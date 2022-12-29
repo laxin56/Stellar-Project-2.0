@@ -1,16 +1,19 @@
 import numpy as np
+import pandas as pd
 from ursina import *
-#import constants
-SUN_MASS = 1.989*(pow(10,30))      # Sun mass
-GRAVITY_CONSTANT = 6.67408/pow(10,11)    # Gravity constant
-STD_GRAVITY_PARAMETER = GRAVITY_CONSTANT*SUN_MASS
+from . import constants
+import math
+
+planets_df = pd.read_csv(r'Planets_Parameters.csv', index_col='Parameters')
+
 class Planet:
 
-    def __init__(self, mass, eccentricity, semi_major_axis, scale, texture_path):
+    def __init__(self, object_name, mass, eccentricity, semi_major_axis, scale, tilt_z, texture_path):
+        self.object_name= object_name
         self.mass = mass
         self.eccentricity = eccentricity
         self.semi_major_axis = semi_major_axis
-        self.year_time = (2 * np.pi * np.sqrt((pow(self.semi_major_axis, 3) / STD_GRAVITY_PARAMETER))) / (24 * 3600) # year time period for this object in earth days
+        self.year_time = (2 * np.pi * np.sqrt((pow(self.semi_major_axis, 3) / constants.STD_GRAVITY_PARAMETER))) / (24 * 3600) # year time period for this object in earth days
         self.time = 0
         self.mean = 0
         self.true_anomaly = 0
@@ -18,7 +21,11 @@ class Planet:
         self.sin_f = 0
         self.x = 0
         self.y = 0
-        self.object = Entity(model="sphere", texture=texture_path, scale=scale, position=(0, 0, 0))
+        self.rotation_period = (planets_df.loc['Rotation Period'][object_name])/24   # Rotation period in hours
+        self.tilt_z = tilt_z
+        self.object = Entity(model="sphere", texture=texture_path, scale=scale, position=(0, 0, 0), rotation=(0, 0, 20))
+        self.orbit_points = [Vec3(0,0,0), Vec3(0,0,0)]
+
 
 
     def Mean(self):
@@ -43,7 +50,7 @@ class Planet:
         if self.time > self.year_time:
             self.time = 0
         else:
-            self.time += 1.0
+            self.time += constants.TIME_SCALE*1.0
 
         self.Mean()
         self.Fixed_Point()
@@ -53,4 +60,13 @@ class Planet:
         self.x = r*self.cos_f
         self.y = r*self.sin_f
 
-        self.object.position = (self.x/10**10, self.y/10**10, 0)
+        self.object.position = (self.x/10**10, (math.tan(math.radians(constants.Coll_Inclination[self.object_name]))*self.x)/10**10, self.y/10**10)
+        #self.object.world_rotation_z += (0, (self.rotation_period / 24) * 360 * constants.TIME_SCALE, 0)
+        self.object.world_rotation_z = 0
+        self.object.world_rotation_y += 3
+        self.object.world_rotation_z = 10
+       # self.object.lookAt(0,100,0)
+ #      self.object.rotation_y=  (self.rotation_period / 24) * 360 * constants.TIME_SCALE
+        #self.orbit_points.append(Vec3(self.x/10**10, (math.tan(math.radians(constants.Coll_Inclination[self.object_name]))*self.x)/10**10, self.y/10**10))
+        #Entity(model=Mesh(vertices=self.orbit_points, mode='line'))
+

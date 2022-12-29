@@ -1,13 +1,15 @@
 
 #Global variables which are constants needed for calculations
 
-SIMULATION_TIME = 0
+TIME_SCALE = 1.0
 SUN_MASS = 1.989*(pow(10,30))      # Sun mass
+SUN_RADIUS = 109
 GRAVITY_CONSTANT = 6.67408/pow(10,11)    # Gravity constant
 STD_GRAVITY_PARAMETER = GRAVITY_CONSTANT*SUN_MASS
 EARTH_MASS = 5.972*pow(10,24)
 EARTH_SMA = 149.6*pow(10,9)
 EARTH_RADIUS = 6378*pow(10,3)
+
 
 
 Coll_Mass = {
@@ -52,6 +54,17 @@ Coll_Radius = {
     'Saturn': 9.449,
     'Uranus': 4.007,
     'Neptune': 3.883
+}
+
+Coll_Inclination = {
+    'Mercury': 7.0,
+    'Venus': 3.4,
+    'Earth': 0.0,
+    'Mars': 1.8,
+    'Jupiter': 1.3,
+    'Saturn': 2.5,
+    'Uranus': 0.8,
+    'Neptune': 1.8
 }
 
 
