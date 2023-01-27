@@ -8,8 +8,9 @@ planets_df = pd.read_csv(r'Planets_Parameters.csv', index_col='Parameters')
 
 class Planet:
 
+
     def __init__(self, object_name, mass, eccentricity, semi_major_axis, scale, tilt_z, texture_path):
-        self.object_name= object_name
+        self.object_name = object_name
         self.mass = mass
         self.eccentricity = eccentricity
         self.semi_major_axis = semi_major_axis
@@ -21,10 +22,11 @@ class Planet:
         self.sin_f = 0
         self.x = 0
         self.y = 0
+        self.flag_elipse_drawed = False
         self.rotation_period = (planets_df.loc['Rotation Period'][object_name])/24   # Rotation period in hours
         self.tilt_z = tilt_z
         self.object = Entity(model="sphere", texture=texture_path, scale=scale, position=(0, 0, 0), rotation=(0, 0, 20))
-        self.orbit_points = [Vec3(0,0,0), Vec3(0,0,0)]
+        self.orbit_points = []
 
 
 
@@ -46,6 +48,13 @@ class Planet:
         self.cos_f = (np.cos(self.true_anomaly) - self.eccentricity) / (1 - self.eccentricity * np.cos(self.true_anomaly))
         self.sin_f = (np.sqrt(1 - pow(self.eccentricity, 2)) * np.sin(self.true_anomaly)) / (1 - self.eccentricity * np.cos(self.true_anomaly))
 
+    def Move_Scene(self):
+        if self.flag_elipse_drawed != True:
+            self.Draw_Elipse()
+        else:
+            self.Calculate_Position()
+
+
     def Calculate_Position(self):
         if self.time > self.year_time:
             self.time = 0
@@ -61,12 +70,29 @@ class Planet:
         self.y = r*self.sin_f
 
         self.object.position = (self.x/10**10, (math.tan(math.radians(constants.Coll_Inclination[self.object_name]))*self.x)/10**10, self.y/10**10)
-        #self.object.world_rotation_z += (0, (self.rotation_period / 24) * 360 * constants.TIME_SCALE, 0)
-        self.object.world_rotation_z = 0
-        self.object.world_rotation_y += 3
-        self.object.world_rotation_z = 10
-       # self.object.lookAt(0,100,0)
- #      self.object.rotation_y=  (self.rotation_period / 24) * 360 * constants.TIME_SCALE
-        #self.orbit_points.append(Vec3(self.x/10**10, (math.tan(math.radians(constants.Coll_Inclination[self.object_name]))*self.x)/10**10, self.y/10**10))
-        #Entity(model=Mesh(vertices=self.orbit_points, mode='line'))
+        # self.object.world_rotation_z += (0, (self.rotation_period / 24) * 360 * constants.TIME_SCALE, 0)
+
+    def Draw_Elipse(self):
+        for x in range(0, int(self.year_time)+1):
+            self.time = x
+            self.Mean()
+            self.Fixed_Point()
+            self.Angle_Calculations()
+
+            r = (self.semi_major_axis * (1 - pow(self.eccentricity, 2))) / (1 + self.eccentricity * self.cos_f)
+            self.x = r * self.cos_f
+            self.y = r * self.sin_f
+            self.orbit_points.append(Vec3(self.x / 10 ** 10,
+                                          (math.tan(math.radians(constants.Coll_Inclination[self.object_name])) * self.x) / 10 ** 10,
+                                          self.y / 10 ** 10))
+
+        Entity(model=Mesh(vertices=self.orbit_points, mode='line'))
+        self.flag_elipse_drawed = True
+
+
+
+
+
+
+
 

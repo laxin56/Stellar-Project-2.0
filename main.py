@@ -29,7 +29,7 @@ def camera_control():
 '''
 
 #Planets for the solar system simulation
-#sun = star.Star(mass=constants.SUN_MASS,eccentricity=1,semi_major_axis=0,scale=constants.SUN_RADIUS,texture_path='/textures/2k_sun.jpg')
+sun = star.Star(mass=constants.SUN_MASS,eccentricity=1,semi_major_axis=0,scale=constants.SUN_RADIUS,texture_path='/textures/2k_sun.jpg')
 earth = planet.Planet(object_name='Earth',mass=constants.Coll_Mass['Earth'], eccentricity=constants.Coll_Eccentricity['Earth'],semi_major_axis=constants.Coll_SMA['Earth'],tilt_z=planets_df.loc['Obliquity to Orbit']['Earth'], scale=constants.Coll_Radius['Earth'],  texture_path='/textures/2k_earth_daymap.jpg')
 mars = planet.Planet(object_name='Mars',mass=constants.Coll_Mass['Mars'], eccentricity=constants.Coll_Eccentricity['Mars'],semi_major_axis=constants.Coll_SMA['Mars'], tilt_z=planets_df.loc['Obliquity to Orbit']['Mars'], scale=constants.Coll_Radius['Mars'], texture_path='/textures/2k_mars.jpg')
 venus = planet.Planet(object_name='Venus',mass=constants.Coll_Mass['Venus'], eccentricity=constants.Coll_Eccentricity['Venus'],semi_major_axis=constants.Coll_SMA['Venus'], tilt_z=planets_df.loc['Obliquity to Orbit']['Venus'], scale=constants.Coll_Radius['Venus'], texture_path='/textures/2k_venus.jpg')
@@ -40,11 +40,11 @@ jupiter = planet.Planet(object_name='Jupiter',mass=constants.Coll_Mass['Jupiter'
 
 
 def update():
-    earth.Calculate_Position()
-    mars.Calculate_Position()
-    mercury.Calculate_Position()
-    venus.Calculate_Position()
-    jupiter.Calculate_Position()
+    earth.Move_Scene()
+    mars.Move_Scene()
+    mercury.Move_Scene()
+    venus.Move_Scene()
+    jupiter.Move_Scene()
 
 ed = EditorCamera()
 app.run()
