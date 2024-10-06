@@ -1,18 +1,13 @@
-import numpy as np
-import time
-from ursina import *
+import sys
+from PyQt5.QtWidgets import QApplication
 
-app = Ursina()
-# Sky(texture = "sky_default")
-window.title = "My Game"
-window.color = color.black
-camera.position = (0, 0)
-window.borderless = False
+from classes.main_window import MainWindow
 
 
-sun = Entity(model="sphere", color=color.yellow, texture='textures/2k_mercury', scale=2)
-earth = Entity(model="sphere", color=color.blue, texture='noise', scale=0.5)
-mars = Entity(model="sphere", color=color.red, texture='noise', scale=0.5)
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
 
 
-app.run()
