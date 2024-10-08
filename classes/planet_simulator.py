@@ -6,7 +6,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 import numpy as np
 from PIL import Image
-
+import math
 from utils.constants import *
 
 
@@ -20,7 +20,8 @@ class PlanetSimulator(QOpenGLWidget):
         # Initialize QTimer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_position)  # Connect the timeout signal to the onTimeout method
-        self.timer.start(100)  # Set the timer to call onTimeout every 100 ms (10 times per second)
+        self.timer.start(10)  # Set the timer to call onTimeout every 100 ms (10 times per second)
+        self.time_elapsed = 0.00001
 
         self.planet_texture_id = None
         self.background_texture_id = None
@@ -89,10 +90,19 @@ class PlanetSimulator(QOpenGLWidget):
         self.earth.drawSphere(self.earth.radius, 50, 50)  # Draw the planet
         glPopMatrix()  # Restore the previous matrix
 
+        self.earth.drawTrail()
+
     def update_position(self):
         # Update the position of the sphere
-        self.earth.sphere_position[0] += 0.1
-        self.earth.sphere_position[1] += 0.1
+        self.time_elapsed += 0.01
+        radius = self.earth.radius
+        self.earth.sphere_position[0] = 20 * radius * math.cos(self.time_elapsed)
+        self.earth.sphere_position[1] = 20 * radius * math.sin(self.time_elapsed)
+        self.earth.sphere_position[2] = 0
+
+        #zprint(self.earth.sphere_position)
+
+        self.earth.trail.append(list(self.earth.sphere_position))
 
         self.update()  # Update the view
 
