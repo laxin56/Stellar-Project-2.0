@@ -13,22 +13,64 @@ from utils.constants import *
 class PlanetSimulator(QOpenGLWidget):
     def __init__(self, parent=None):
         super(PlanetSimulator, self).__init__(parent)
-        self.background = CelestalBody(0, 30, [0, 0, 0])
-        self.sun = CelestalBody(100, 4, [0, 0, 0])
-        self.earth = CelestalBody(1, 1, [0, 6, 0])
+        #self.background = CelestalBody(0, 30, [0, 0, 0])
+        self.sun = CelestalBody(radius=SUN_RADIUS,
+                              name='sun',
+                              mass=SUN_MASS,
+                              eccentricity=0,
+                              semi_major_axis=0,
+                              tilt_z=0,
+                              initial_position= [0, 0, 0]
+        )
+        self.earth = CelestalBody(radius=EARTH_RADIUS,
+                                  name='earth',
+                                  mass=EARTH_MASS,
+                                  eccentricity=EARTH_ECCENTRICITY,
+                                  semi_major_axis=EARTH_SMA,
+                                  tilt_z=30,
+                                  initial_position= [0, 0, 0]
+        )
+
+        self.mercury = CelestalBody(radius=MERCURY_RADIUS,
+                                  name='mercury',
+                                  mass=MERCURY_MASS,
+                                  eccentricity=MERCURY_ECCENTRICITY,
+                                  semi_major_axis=MERCURY_SMA,
+                                  tilt_z=20,
+                                  initial_position= [0, 0, 0]
+        )
+
+        self.mars = CelestalBody(radius=MARS_RADIUS,
+                                  name='mars',
+                                  mass=MARS_MASS,
+                                  eccentricity=MARS_ECCENTRICITY,
+                                  semi_major_axis=MARS_SMA,
+                                  tilt_z=15,
+                                  initial_position= [0, 0, 0]
+        )
+
+        self.moon = CelestalBody(radius=MOON_RADIUS,
+                                  name='moon',
+                                  mass=MOON_MASS,
+                                  eccentricity=MOON_ECCENTRICITY,
+                                  semi_major_axis=MOON_SMA,
+                                  tilt_z=5.9,
+                                  initial_position= [0, 0, 0]
+        )
 
         # Initialize QTimer
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_position)  # Connect the timeout signal to the onTimeout method
-        self.timer.start(10)  # Set the timer to call onTimeout every 100 ms (10 times per second)
-        self.time_elapsed = 0.00001
+        self.timer.start(30)  # Set the timer to call onTimeout every 100 ms (10 times per second)
+        self.time_elapsed = 0
 
         self.planet_texture_id = None
+
         self.background_texture_id = None
         self.sun_texture_id = None
 
-        self.camera_distance = 10  # Ustawienie początkowej pozycji kamery
-        self.camera_angle_x = 90  # Kąt obrotu kamery wokół osi X
+        self.camera_distance = 40  # Ustawienie początkowej pozycji kamery
+        self.camera_angle_x = 45  # Kąt obrotu kamery wokół osi X
         self.camera_angle_y = 0  # Kąt obrotu kamery wokół osi Y
         self.last_mouse_x = 0
         self.last_mouse_y = 0
@@ -42,6 +84,9 @@ class PlanetSimulator(QOpenGLWidget):
         self.planet_texture_id = self.loadTexture(texture_earth)
         self.background_texture_id = self.loadTexture(texture_background)
         self.sun_texture_id = self.loadTexture(texture_sun)
+        self.moon_texture_id = self.loadTexture(texture_moon)
+        self.mercury_texture_id = self.loadTexture(texture_mercury)
+        self.mars_texture_id = self.loadTexture(texture_mars)
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
@@ -83,29 +128,72 @@ class PlanetSimulator(QOpenGLWidget):
         glBindTexture(GL_TEXTURE_2D, self.sun_texture_id)
         self.sun.drawSphere(self.sun.radius, 50, 50)
 
-        # Move the planet to its current position
+        # Render a moon at the center of a plane
         glPushMatrix()  # Save the current matrix
-        glTranslatef(self.earth.sphere_position[0], self.earth.sphere_position[1], self.earth.sphere_position[2])  # Move sphere
+        glTranslatef(self.moon.sphere_position[0],
+                     self.moon.sphere_position[1],
+                     self.moon.sphere_position[2])  # Move sphere
+        glBindTexture(GL_TEXTURE_2D, self.moon_texture_id)
+        self.sun.drawSphere(self.moon.radius, 50, 50)  # Draw the planet
+        glPopMatrix()  # Restore the previous matrix
+
+        # Render Earth
+        glPushMatrix()  # Save the current matrix
+        glTranslatef(self.earth.sphere_position[0],
+                     self.earth.sphere_position[1],
+                     self.earth.sphere_position[2])  # Move sphere
         glBindTexture(GL_TEXTURE_2D, self.planet_texture_id)
         self.earth.drawSphere(self.earth.radius, 50, 50)  # Draw the planet
         glPopMatrix()  # Restore the previous matrix
 
+        # Render Earth
+        glPushMatrix()  # Save the current matrix
+        glTranslatef(self.mercury.sphere_position[0],
+                     self.mercury.sphere_position[1],
+                     self.mercury.sphere_position[2])  # Move sphere
+        glBindTexture(GL_TEXTURE_2D, self.planet_texture_id)
+        self.mercury.drawSphere(self.mercury.radius, 50, 50)  # Draw the planet
+        glPopMatrix()  # Restore the previous matrix
+
+        # Render Earth
+        glPushMatrix()  # Save the current matrix
+        glTranslatef(self.mars.sphere_position[0],
+                     self.mars.sphere_position[1],
+                     self.mars.sphere_position[2])  # Move sphere
+        glBindTexture(GL_TEXTURE_2D, self.planet_texture_id)
+        self.mars.drawSphere(self.mars.radius, 50, 50)  # Draw the planet
+        glPopMatrix()  # Restore the previous matrix
+
         self.earth.drawTrail()
+        self.mercury.drawTrail()
+        self.mars.drawTrail()
 
     def update_position(self):
         # Update the position of the sphere
-        self.time_elapsed += 0.01
-        radius = self.earth.radius
-        self.earth.sphere_position[0] = 20 * radius * math.cos(self.time_elapsed)
-        self.earth.sphere_position[1] = 20 * radius * math.sin(self.time_elapsed)
-        self.earth.sphere_position[2] = 0
+        self.time_elapsed += 1
+        self.earth.time = self.time_elapsed
+        self.moon.time = self.time_elapsed
+        self.mars.time = self.time_elapsed
+        self.mercury.time = self.time_elapsed
 
-        #zprint(self.earth.sphere_position)
+        # Calculate the position of earth and move it correspondingly
+        self.earth.calculate_position()
+        self.moon.calculate_position()
+        self.mars.calculate_position()
+        self.mercury.calculate_position()
+        print(self.mars.sphere_position)
+        self.moon.sphere_position[0] = self.moon.sphere_position[0]*(10**5) + self.earth.sphere_position[0]
+        self.moon.sphere_position[1] = self.moon.sphere_position[1]*(10**5) + self.earth.sphere_position[1]
+        self.moon.sphere_position[2] = self.moon.sphere_position[2]*(10**5) + self.earth.sphere_position[2]
 
+
+        # Add the trail in the form of orbit
         self.earth.trail.append(list(self.earth.sphere_position))
+        self.mars.trail.append(list(self.mars.sphere_position))
+        self.mercury.trail.append(list(self.mercury.sphere_position))
 
+        # Always needed
         self.update()  # Update the view
-
 
     # Obsługa myszy
     def mousePressEvent(self, event):
